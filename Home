@@ -22,7 +22,7 @@
     /* Style the individual video sections */
     .video-section {
       scroll-snap-align: start;
-      height: 100vh;
+      height: 120vh; /* Increase the height to make the outline longer */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -51,83 +51,97 @@
       font-weight: bold;
       opacity: 0.5;
     }
+
+    /* Button styles */
+    .buttons {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .button {
+      margin: 0 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
   </style>
 </head>
 <body>
   <!-- Watermark -->
   <div class="watermark">ScrollTube</div>
-  
+
+  <!-- Buttons -->
+  <div class="buttons">
+    <button class="button">Button 1</button>
+    <button class="button">Button 2</button>
+  </div>
+
   <!-- Video container -->
   <div class="video-container">
     <!-- Video sections -->
     <div class="video-section">
-      <iframe class="youtube-video" src="https://www.youtube.com/embed/AjLKTz81bj8?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe class="youtube-video" src="https://www.youtube.com/embed/AjLKTz81bj8?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
     <div class="video-section">
-      <iframe class="youtube-video" src="https://www.youtube.com/embed/avz06PDqDbM?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe class="youtube-video" src="https://www.youtube.com/embed/avz06PDqDbM?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
     <div class="video-section">
-      <iframe class="youtube-video" src="https://www.youtube.com/embed/Y274jZs5s7s?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe class="youtube-video" src="https://www.youtube.com/embed/Y274jZs5s7s?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
     <div class="video-section">
-      <iframe class="youtube-video" src="https://www.youtube.com/embed/f-zqS2CiZqw?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe class="youtube-video" src="https://www.youtube.com/embed/f-zqS2CiZqw?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
     <!-- Add more video sections as needed -->
   </div>
 
   <script>
-    let playerInstances = [];
-
-    function onYouTubeIframeAPIReady() {
-      const videos = document.querySelectorAll('.youtube-video');
-
-      videos.forEach((video) => {
-        const player = new YT.Player(video, {
-          events: {
-            'onReady': onPlayerReady
-          }
-        });
-
-        playerInstances.push(player);
-      });
-    }
-
-    function onPlayerReady(event) {
-      event.target.pauseVideo();
-    }
-
-    function playCurrentVideo() {
+    // Scroll snap navigation using arrow keys
+    window.addEventListener('keydown', function(e) {
       const container = document.querySelector('.video-container');
-      const videos = document.querySelectorAll('.youtube-video');
-      const scrollOffset = container.scrollTop + (window.innerHeight / 2);
+      if (e.key === 'ArrowUp') {
+        container.scrollBy({
+          top: -window.innerHeight,
+          behavior: 'smooth'
+        });
+      } else if (e.key === 'ArrowDown') {
+        container.scrollBy({
+          top: window.innerHeight,
+          behavior: 'smooth'
+        });
+      }
+    });
 
-      videos.forEach((video, index) => {
-        const rect = video.getBoundingClientRect();
-        const isVisible = rect.top < scrollOffset && rect.bottom > scrollOffset;
+    // Scroll snap navigation using touch gestures
+    let touchStartY = 0;
+    window.addEventListener('touchstart', function(e) {
+      touchStartY = e.touches[0].clientY;
+    });
 
-        if (isVisible) {
-          playerInstances.forEach((player, playerIndex) => {
-            if (index === playerIndex) {
-              player.playVideo();
-            } else {
-              player.pauseVideo();
-            }
-          });
-        }
-      });
-    }
+    window.addEventListener('touchend', function(e) {
+      const container = document.querySelector('.video-container');
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchEndY - touchStartY;
 
-    function handleScroll() {
-      playCurrentVideo();
-    }
-
-    window.addEventListener('scroll', handleScroll);
-
-    // Load YouTube Iframe API asynchronously
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      if (deltaY < -50) {
+        container.scrollBy({
+          top: window.innerHeight,
+          behavior: 'smooth'
+        });
+      } else if (deltaY > 50) {
+        container.scrollBy({
+          top: -window.innerHeight,
+          behavior: 'smooth'
+        });
+      }
+    });
   </script>
 </body>
 </html>
